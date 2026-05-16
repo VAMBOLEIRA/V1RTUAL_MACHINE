@@ -16,7 +16,7 @@ Instruccion CU::fetch(Program& theProgram)
     // IR ← MBR
     reg.setIR(reg.getMBR());
     // PC++
-    reg.incrementPC();
+    //reg.incrementPC();
     
     return inst;
 }
@@ -115,29 +115,33 @@ void CU::run(Program& theProgram)
 {
     status = "running";
     reg.reset();
-    reg.setPC(0);  // PC empieza en 0
+    reg.setPC(0);
     
     while (status == "running" && reg.getPC() < theProgram.getSize())
     {
         std::cout << "\n[Ciclo " << reg.getPC() + 1 << "]" << std::endl;
         
+        int pc_actual = reg.getPC();
+        
         // FETCH
         Instruccion inst = fetch(theProgram);
         std::cout << "Fetch: " << inst.getName() 
-                  << " [PC=" << reg.getPC() - 1 << " -> IR=" << reg.getIR() << "]" << std::endl;
+                  << " [PC=" << pc_actual << " -> IR=" << reg.getIR() << "]" << std::endl;
         
         // DECODE
         int code = decode(inst);
         std::cout << "Decode: codigo " << code << std::endl;
         
         // Obtener operandos
-        int pc_anterior = reg.getPC() - 1;
-        int op1 = theProgram.getOperand1(pc_anterior);
-        int op2 = theProgram.getOperand2(pc_anterior);
+        int op1 = theProgram.getOperand1(pc_actual);
+        int op2 = theProgram.getOperand2(pc_actual);
         
         // EXECUTE
         std::cout << "Execute: ";
         execute(code, op1, op2);
+        
+        // Incrementar PC DESPUÉS de ejecutar
+        reg.incrementPC();
     }
     
     std::cout << "\nPrograma finalizado." << std::endl;
